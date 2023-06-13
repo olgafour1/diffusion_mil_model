@@ -37,18 +37,18 @@ diffusion:
     aux_cls:
         pre_train: True
         joint_train: False
-        n_pretrain_epochs: 1
+        n_pretrain_epochs: 100
         logging_interval: 1
 
 training:
-    n_epochs: 2
+    n_epochs: 100
     warmup_epochs: 50
     add_t0_loss: False
     lambda_ce: 0.01
     n_steps_req_grad: 100
     n_ce_epochs_warmup: 10
     n_ce_epochs_interval: 50
-    snapshot_freq: 1
+    snapshot_freq: 5
     logging_freq: 100
     validation_freq: 1
 
