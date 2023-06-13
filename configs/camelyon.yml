@@ -29,7 +29,7 @@ diffusion:
     beta_schedule: linear  # cosine_anneal, cosine
     beta_start: 0.0001
     beta_end: 0.02
-    timesteps: 1
+    timesteps: 10
     vis_step: 100
     num_figs: 10
     include_guidance: True  # concat y_t with aux pred as eps_theta input
@@ -48,7 +48,7 @@ training:
     n_steps_req_grad: 100
     n_ce_epochs_warmup: 10
     n_ce_epochs_interval: 50
-    snapshot_freq: 5
+    snapshot_freq: 1
     logging_freq: 100
     validation_freq: 1
 
