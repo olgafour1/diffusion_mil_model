@@ -13,10 +13,6 @@ camelyon_Saved_model
 /camelyon_results
 # Byte-compiled / optimized / DLL files
 __pycache__/
-training/__pycache__/
-wsi_core/__pycache__/
-utils/__pycache__/
-dataset_utils/__pycache__/
 
 *.py[cod]
 
@@ -74,7 +70,6 @@ lipo_csv_files
 results/
 results_fold0/
 tcga_results/
-vaegan_utils/__pycache__/
 camelyon_results/
 
 .../__pycache__/
