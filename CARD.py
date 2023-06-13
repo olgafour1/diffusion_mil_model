@@ -245,7 +245,9 @@ class Diffusion(object):
             # print(f'Validation Accuracy ---> {val_acc.compute():.6f}')
             # val_acc.reset()
             if min_valid_loss > val_loss:
-                print(f'Validation Loss Decreased ({min_valid_loss:.6f}--->{val_loss:.6f}) \t Saving The Model')
+                logging.info(
+                    f'Validation Loss Decreased ({min_valid_loss:.6f}--->{val_loss:.6f}) \t Saving The Model'
+                            )
                 min_valid_loss = val_loss
                 # Saving State Dict
                 aux_states = [
@@ -302,7 +304,6 @@ class Diffusion(object):
 
                     y_one_hot_batch, y_logits_batch = cast_bag_label_to_one_hot_and_prototype(bag_label,
                                                                                               config)
-                    n = train_features.size(0)
 
                     model.train()
                     self.cond_pred_model.eval()
@@ -310,10 +311,8 @@ class Diffusion(object):
 
                     # antithetic sampling
                     t = torch.randint(
-                        low=0, high=self.num_timesteps, size=(n // 2 + 1,)
+                        low=0, high=self.num_timesteps, size=(self.num_timesteps,),
                     ).to(self.device)
-
-                    t = torch.cat([t, self.num_timesteps - 1 - t], dim=0)[:n]
 
                     y_0_hat_batch  = self.compute_guiding_prediction([
                     torch.squeeze(train_features).to(self.device),
@@ -322,11 +321,12 @@ class Diffusion(object):
                     ])
 
                     y_T_mean = y_0_hat_batch
-                    if config.diffusion.noise_prior:  # apply 0 instead of f_phi(x) as prior mean
+                    if config.diffusion.noise_prior:
                         y_T_mean = torch.zeros(y_0_hat_batch.shape).to(y_0_hat_batch.device)
 
                     y_0_batch = y_one_hot_batch.to(self.device)
                     e = torch.randn_like(y_0_batch).to(y_0_batch.device)
+
                     y_t_batch = q_sample(y_0_batch, y_T_mean,
                                          self.alphas_bar_sqrt, self.one_minus_alphas_bar_sqrt, t, noise=e)
 
@@ -334,7 +334,7 @@ class Diffusion(object):
 
                     loss = (e - output).square().mean()  # use the same noise sample e during training to compute loss
                     loss0 = torch.tensor([0])
-                    ce_loss= torch.tensor([0])
+
 
                     if args.add_ce_loss:
 
@@ -373,10 +373,11 @@ class Diffusion(object):
                     if self.config.model.ema:
                         ema_helper.update(model)
 
-                logging.info(
+                logging.info\
+                        (
                     (f"epoch: {epoch}, step: {step}, CE loss: {loss0.item()}, Noise Estimation loss: {loss.item()}, " +
                      f"data time: {data_time / (step + 1)}")
-                )
+                        )
 
                 # save diffusion model
                 if step % self.config.training.snapshot_freq == 0 or step == 1:
@@ -414,7 +415,7 @@ class Diffusion(object):
                         model.eval()
                         self.cond_pred_model.eval()
                         acc_avg = 0.
-                        for test_batch_idx, (val_features, val_indices,val_values,target ) in enumerate(test_dataloader):
+                        for test_batch_idx, (val_features, val_indices,val_values, target ) in enumerate(test_dataloader):
 
                             val_features= torch.squeeze(val_features).to(self.device)
                             val_indices= torch.squeeze(val_indices).to(self.device)
@@ -535,10 +536,11 @@ class Diffusion(object):
             # make plots to check normality assumptions (differences btw two most probable classes) for the t-test
             # (check https://www.researchgate.net/post/Paired_t-test_and_normality_test_question)
 
-            ttest_pvalues = (ttest_rel(gen_y_2_class_probs[:, :, 0],
-                                       gen_y_2_class_probs[:, :, 1],
-                                       axis=1, alternative='two-sided')).pvalue  # (batch_size, )
-            ttest_reject = (ttest_pvalues < config.testing.ttest_alpha)  # (batch_size, )
+            # ttest_pvalues = (ttest_rel(gen_y_2_class_probs[:, :, 0],
+            #                            gen_y_2_class_probs[:, :, 1],
+            #                            axis=1, alternative='two-sided')).pvalue  # (batch_size, )
+            #
+            # # ttest_reject = (ttest_pvalues < config.testing.ttest_alpha)  # (batch_size, )
 
             if len(majority_vote_by_batch_list[current_t]) == 0:
                 majority_vote_by_batch_list[current_t] = gen_y_majority_vote
@@ -554,7 +556,7 @@ class Diffusion(object):
                     label_mean_probs_by_batch_list[current_t] = gen_y_all_class_mean_prob
                     instance_accuracy_by_batch_list[current_t] = gen_y_instance_accuracy
                     CI_by_batch_list[current_t] = CI_y_pred
-                    ttest_reject_by_batch_list[current_t] = ttest_reject
+                    #ttest_reject_by_batch_list[current_t] = ttest_reject
                 else:
                     all_class_probs_by_batch_list[current_t] = np.concatenate(
                         [all_class_probs_by_batch_list[current_t], gen_y_all_class_probs], axis=0)
@@ -566,8 +568,8 @@ class Diffusion(object):
                         [instance_accuracy_by_batch_list[current_t], gen_y_instance_accuracy], axis=0)
                     CI_by_batch_list[current_t] = np.concatenate(
                         [CI_by_batch_list[current_t], CI_y_pred], axis=0)
-                    ttest_reject_by_batch_list[current_t] = np.concatenate(
-                        [ttest_reject_by_batch_list[current_t], ttest_reject], axis=0)
+                    # ttest_reject_by_batch_list[current_t] = np.concatenate(
+                    #     [ttest_reject_by_batch_list[current_t], ttest_reject], axis=0)
 
         def p_sample_loop_with_eval(model, x, y_0_hat, y_T_mean, n_steps,
                                     alphas, one_minus_alphas_bar_sqrt,
@@ -589,6 +591,7 @@ class Diffusion(object):
             for i in reversed(range(1, n_steps)):
                 y_t = cur_y
                 cur_y = p_sample(model, x, y_t, y_0_hat, y_T_mean, i, alphas, one_minus_alphas_bar_sqrt)  # y_{t-1}
+                print (cur_y)
                 num_t += 1
                 optional_metric_compute(cur_y, num_t)
             assert num_t == n_steps
@@ -771,7 +774,6 @@ class Diffusion(object):
 
         args = self.args
         config = self.config
-        split = args.split
         log_path = os.path.join(self.args.log_path)
 
         references = pd.read_csv(self.csv_file)
@@ -1032,8 +1034,17 @@ class Diffusion(object):
         logging.info("Mean accuracy of all samples at test instance level is {:.4f}%.\n".format(
             np.mean(instance_accuracy_t) * 100))
 
-        # clear the memory
-        plt.close('all')
+        # logging.info("\nNow we compute metrics related to predicted probability quantiles for all classes...")
+        # CI_all_classes_t = CI_by_batch_list[config.testing.metrics_t]  # (n_test, 2, n_classes)
+        # majority_vote_t = majority_vote_by_batch_list[config.testing.metrics_t]  # (n_test, 1)
+        # majority_vote_accuracy_by_class, \
+        #     CI_width_correct_pred_by_class, \
+        #     CI_width_incorrect_pred_by_class = compute_quantile_metrics(
+        #     config, CI_all_classes_t, majority_vote_t.flatten(), all_true_y_labels.flatten())
+        # # print(CI_all_classes_t[159])  #@#
+        #
+
+
         del label_probs_by_batch_list
         del majority_vote_by_batch_list
         del instance_accuracy_by_batch_list

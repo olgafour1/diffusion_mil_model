@@ -128,18 +128,23 @@ parser.add_argument(
     "--num_sample", type=int, default=1, help="number of samples used in forward and reverse"
 )
 
+args = parser.parse_args()
 
-def parse_config(args):
+def parse_config():
     args.log_path = os.path.join(args.exp, "logs", args.doc)
 
     # parse config file
     with open(os.path.join(args.config), "r") as f:
         if args.test:
+            print (os.path.join(args.config))
             config = yaml.unsafe_load(f)
+            print (config)
             new_config = config
         else:
             config = yaml.safe_load(f)
             new_config = dict2namespace(config)
+
+
 
     tb_path = os.path.join(args.exp, "tensorboard", args.doc)
     if not os.path.exists(tb_path):
@@ -225,13 +230,11 @@ def parse_config(args):
         logger.setLevel(level)
 
 
-
     # add device
     device_name = 'cuda:{}'.format(args.device) if torch.cuda.is_available() else 'cpu'
     device = torch.device(device_name)
     logging.info("Using device: {}".format(device))
     new_config.device = device
-
     # set random seed
 
     def seed_torch(seed=7):
@@ -247,7 +250,6 @@ def parse_config(args):
         torch.backends.cudnn.deterministic = True
 
     seed_torch(args.seed)
-
     return new_config, logger
 
 
@@ -261,11 +263,10 @@ def dict2namespace(config):
         setattr(namespace, key, new_value)
     return namespace
 
-
 def main():
-    args = parser.parse_args()
 
-    config, logger = parse_config(args)
+
+    config, logger = parse_config()
     logging.info("Writing log file to {}".format(args.log_path))
     logging.info("Exp instance id = {}".format(os.getpid()))
     logging.info("Exp comment = {}".format(args.comment))
@@ -286,6 +287,7 @@ def main():
         else:
             runner.train()
             procedure = "Training"
+
         end_time = time.time()
         logging.info("\n{} procedure finished. It took {:.4f} minutes.\n\n\n".format(
             procedure, (end_time - start_time) / 60))
@@ -297,10 +299,8 @@ def main():
 
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    args.doc = args.doc + "/split_" + str(args.split)
 
     if args.test:
-        args.config = args.config + args.doc + "/config.yml"
+        args.config = args.exp + "/logs/" + args.doc + "/config.yml"
 
     sys.exit(main())
