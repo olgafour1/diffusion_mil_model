@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=test_gpu
-#SBATCH --output=/home/mvries/Diffusion_Mil/camelyon_results/test_run.txt
-#SBATCH --error=/home/mvries/Diffusion_Mil/camelyon_results/error.err
+#SBATCH --output=/home/olgafour1/Diffusion_Mil/camelyon_results/test_run.txt
+#SBATCH --error=/home/olgafour1/Diffusion_Mil/camelyon_results/error.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
 #SBATCH --time=48:00:00
@@ -10,8 +10,8 @@
 
 module load anaconda/3
 source /opt/software/applications/anaconda/3/etc/profile.d/conda.sh
-conda activate openslide
-cd /home/mvries/Diffusion_Mil/
+conda activate card
+cd /home/olgafour1/Diffusion_Mil/
 
 
 python main.py --ni --eval_best  --add_ce_loss  --exp run_test  --doc diffusion_model  --config configs/camelyon.yml --loss card_onehot_conditional --csv_file camelyon_csv_files/splits_0.csv
