@@ -52,21 +52,15 @@ training:
     logging_freq: 100
     validation_freq: 1
 
-
 testing:
     last_only: True
-    n_samples: 1
+    n_samples: 5
     n_bins: 10
     compute_metric_all_steps: False
     metrics_t: 0
     ttest_alpha: 0.05
     trimmed_mean_range: [0.0, 100.0]
     PICP_range: [2.5, 97.5]
-    make_plot: True
-    squared_plot: True
-    plot_true: True
-    plot_gen: True
-    fig_size: [8, 5]
 
 optim:
     weight_decay: 0.000
