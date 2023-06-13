@@ -1,0 +1,91 @@
+data:
+    dataset: "camelyon"
+    noisy: False
+    seed: 12321
+    label_min_max: [0.001, 0.999]
+    num_classes: 2
+    num_workers: 8
+    feature_path: /home/admin_ofourkioti/Documents/camelyon/resnet_feats/h5_files/
+    pretrained: False
+    csv_file: /home/admin_ofourkioti/PycharmProjects/my_models/Diffusion_Mil/camelyon_csv_files/splits_0.csv
+    label_file: /home/admin_ofourkioti/PycharmProjects/my_models/Diffusion_Mil/label_files/camelyon_data.csv
+
+model:
+    type: "simple"
+    data_dim: 512
+    n_input_channels: 1
+    n_input_padding: 2
+    feature_dim: 512
+    hidden_dim: 128
+    cat_x: True
+    cat_y_pred: True
+    arch: linear
+    # arch: simple
+    var_type: fixedlarge
+    ema_rate: 0.9999
+    ema: False
+
+diffusion:
+    beta_schedule: linear  # cosine_anneal, cosine
+    beta_start: 0.0001
+    beta_end: 0.02
+    timesteps: 1
+    vis_step: 100
+    num_figs: 10
+    include_guidance: True  # concat y_t with aux pred as eps_theta input
+    apply_aux_cls: True
+    aux_cls:
+        pre_train: True
+        joint_train: False
+        n_pretrain_epochs: 1
+        logging_interval: 1
+
+training:
+    n_epochs: 2
+    warmup_epochs: 50
+    add_t0_loss: False
+    lambda_ce: 0.01
+    n_steps_req_grad: 100
+    n_ce_epochs_warmup: 10
+    n_ce_epochs_interval: 50
+    snapshot_freq: 1
+    logging_freq: 100
+    validation_freq: 1
+
+
+testing:
+    last_only: True
+    n_samples: 1
+    n_bins: 10
+    compute_metric_all_steps: False
+    metrics_t: 0
+    ttest_alpha: 0.05
+    trimmed_mean_range: [0.0, 100.0]
+    PICP_range: [2.5, 97.5]
+    make_plot: True
+    squared_plot: True
+    plot_true: True
+    plot_gen: True
+    fig_size: [8, 5]
+
+optim:
+    weight_decay: 0.000
+    optimizer: "Adam"
+    lr: 0.001
+    beta1: 0.9
+    amsgrad: false
+    eps: 0.00000001
+    grad_clip: 1.0
+    lr_schedule: True
+    min_lr: 0.0
+
+
+aux_optim:
+    weight_decay: 0
+    optimizer: "Adam"
+    lr: 0.0002
+    beta1: 0.9
+    beta2 : 0.999
+    amsgrad: False
+    eps:  0.0000001
+    grad_clip: None
