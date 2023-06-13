@@ -308,17 +308,21 @@ class Diffusion(object):
                     model.train()
                     self.cond_pred_model.eval()
                     step += 1
+                    n = train_features.size(0)
 
                     # antithetic sampling
                     t = torch.randint(
                         low=0, high=self.num_timesteps, size=(self.num_timesteps,),
                     ).to(self.device)
 
+                    t = t[:n]
+
                     y_0_hat_batch  = self.compute_guiding_prediction([
                     torch.squeeze(train_features).to(self.device),
                     torch.squeeze(train_indices).to(self.device),
                     torch.squeeze(train_values).to(self.device)
                     ])
+
 
                     y_T_mean = y_0_hat_batch
                     if config.diffusion.noise_prior:
@@ -330,7 +334,8 @@ class Diffusion(object):
                     y_t_batch = q_sample(y_0_batch, y_T_mean,
                                          self.alphas_bar_sqrt, self.one_minus_alphas_bar_sqrt, t, noise=e)
 
-                    output = model( torch.squeeze(train_features).to(self.device), y_t_batch.to(self.device), t, y_0_hat_batch)
+                    output = model(torch.squeeze(train_features).to(self.device),
+                                   y_t_batch.to(self.device), t, y_0_hat_batch)
 
                     loss = (e - output).square().mean()  # use the same noise sample e during training to compute loss
                     loss0 = torch.tensor([0])
@@ -591,7 +596,7 @@ class Diffusion(object):
             for i in reversed(range(1, n_steps)):
                 y_t = cur_y
                 cur_y = p_sample(model, x, y_t, y_0_hat, y_T_mean, i, alphas, one_minus_alphas_bar_sqrt)  # y_{t-1}
-                print (cur_y)
+
                 num_t += 1
                 optional_metric_compute(cur_y, num_t)
             assert num_t == n_steps
