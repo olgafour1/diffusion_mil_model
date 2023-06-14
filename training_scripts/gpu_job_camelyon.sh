@@ -13,7 +13,7 @@ source /opt/software/applications/anaconda/3/etc/profile.d/conda.sh
 conda activate card
 cd /home/ofourkioti/Projects/diffusion_mil_model/
 
-python main.py --ni --eval_best  --add_ce_loss  --exp run_test_timesteps_5  --doc diffusion_model  --config configs/camelyon.yml --loss card_onehot_conditional --csv_file camelyon_csv_files/splits_0.csv --timesteps 5;
+python main.py --ni --eval_best  --add_ce_loss  --exp run_test_timesteps_5  --doc diffusion_model  --config configs/camelyon.yml --loss card_onehot_conditional --csv_file camelyon_csv_files/splits_0.csv --timesteps 3;
 python main.py  --eval_best  --add_ce_loss  --exp run_test_timesteps_5  --doc diffusion_model  --config configs/camelyon.yml --loss card_onehot_conditional  --test --tune --tune_T
 
 
